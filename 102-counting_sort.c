@@ -1,94 +1,68 @@
 #include "sort.h"
 
 /**
- * arr_zero_init - initialize array by 0
+ * get_max - Get the maximum value in an array of integers.
+ * @array: An array of integers.
+ * @size: The size of the array.
  *
- * @array: array to be initialized
- * @size: size of the array
+ * Return: The maximum integer in the array.
  */
-void arr_zero_init(int *array, int size)
+int get_max(int *array, int size)
 {
-	int p;
+	int max, p;
 
-	for (p = 0; p < size; p++)
-		array[p] = 0;
-}
-
-/**
- * get_max - gets the maximum value in the array
- *
- * @array: array to get max value from
- * @size: size of the array
- *
- * Return: maximum value in the array
- */
-int get_max(int *array, size_t size)
-{
-	int maxi;
-	size_t p;
-
-	if (size < 2)
-		return (0);
-
-	maxi = array[0];	/* start from first index */
-
-	for (p = 1; p < size; p++)
+	for (max = array[0], p = 1; p < size; p++)
 	{
-		if (maxi < array[p])
-			maxi = array[p];
+		if (array[p] > max)
+			max = array[p];
 	}
 
-	return (maxi);
+	return (max);
 }
 
 /**
- * counting_sort - sorts an array using the counting
- * sort algorithm
+ * counting_sort - Sort an array of integers in ascending order
+ *                 using the counting sort algorithm.
+ * @array: An array of integers.
+ * @size: The size of the array.
  *
- * @array: initial array
- * @size: size of the array
+ * Description: Prints the counting array after setting it up.
  */
 void counting_sort(int *array, size_t size)
 {
-	int n = get_max(array, size), m, *position, *sumPosition, *sorted;
-	size_t p;
+	int *count, *sorted, max, p;
 
-	if (n == 0)
+	if (array == NULL || size < 2)
 		return;
-
-	position = malloc(sizeof(int) * (n + 1));
-	if (!position)
-		return;
-	arr_zero_init(position, n + 1);
-
-	for (p = 0; p < size; p++)
-		position[array[p]] += 1;    /* set one to the positions */
-
-	sumPosition = malloc(sizeof(int) * (n + 1));
-	if (!sumPosition)
-		return;
-	arr_zero_init(sumPosition, n + 1);
-	sumPosition[0] = position[0];   /* make first index equal */
-
-	for (m = 1; m < (n + 1); m++)
-		sumPosition[m] = position[m] + sumPosition[m - 1];
-
-	free(position), print_array(sumPosition, n + 1);
 
 	sorted = malloc(sizeof(int) * size);
-	if (!sorted)
+	if (sorted == NULL)
 		return;
-	arr_zero_init(sorted, size);
-
-	for (p = 0; p < size; p++)  /* get the sorted array */
+	max = get_max(array, size);
+	count = malloc(sizeof(int) * (max + 1));
+	if (count == NULL)
 	{
-		sumPosition[array[p]] -= 1;
-		sorted[sumPosition[array[p]]] = array[p];
+		free(sorted);
+		return;
 	}
-	free(sumPosition);
 
-	for (p = 0; p < size; p++)  /* update array */
-	
+	for (p = 0; p < (max + 1); p++)
+		count[p] = 0;
+	for (p = 0; p < (int)size; p++)
+		count[array[p]] += 1;
+	for (p = 0; p < (max + 1); p++)
+		count[p] += count[p - 1];
+	print_array(count, max + 1);
+
+	for (p = 0; p < (int)size; p++)
+	{
+		sorted[count[array[p]] - 1] = array[p];
+		count[array[p]] -= 1;
+	}
+
+	for (p = 0; p < (int)size; p++)
 		array[p] = sorted[p];
+
 	free(sorted);
+	free(count);
 }
